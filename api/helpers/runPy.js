@@ -7,26 +7,32 @@ const codeDir = path.join(__dirname, "../", "codes")
 
 const runPy = async (dir) => {
     const outFileName = await path.basename(dir).split(".")[0]
-    //return new Promise((resolve, reject) => {
-        console.log()
-        await exec(`cd ${codeDir} && python ${outFileName}.py`, (error, stdout, stderr)=>{
+    const p = new Promise((resolve, reject) => {
+        exec(`cd ${codeDir} && python ${outFileName}.py`, (error, stdout, stderr)=>{
         console.log("inside")
             if(error){
                 console.log("errorrrrrrr")
-                //console.log(error)
-                return error
-                //reject({ error, stderr})
+                console.log(error)
+                reject({ error, stderr})
             }
             if(stderr){ 
                 console.log("stderrrrrrrrrrrrrrr")
-                //console.log(stderr)
-                return stderr
-                //reject({stderr})
+                console.log(stderr)
+                reject({stderr})
             }
             console.log(stdout)
-            return stdout
+            resolve({stdout})
        }) 
 
-   // })
+    })
+    p.then((m) => {
+        console.log("inside then")
+        const res = {success: true, message: m}
+        return res
+    }).catch((e) => {
+        console.log("inside catch")
+        const res = {success: false, message: e}
+        return res
+    })
 }
 module.exports = runPy
