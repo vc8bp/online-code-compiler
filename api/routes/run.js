@@ -12,15 +12,32 @@ router.post("/cpp", async (req,res) => {
     console.log(0)
     let output = "hh";
 
-    const p = new Promise((resolve,reject) => {
-        const data = runPy(filePath)
-        resolve(data)
-    })
-    p.then((message) => {
-        console.log("message")
-        console.log(message)
+
+    // const p = new Promise((resolve,reject) => {
+    //     const data = runPy(filePath)
+    //     console.log("runPy done")
+    //     resolve(data)
+    // })
+    // p.then((message) => {
+    //     console.log("message")
+    //     console.log(message)
+    //     return res.status(200).json({
+    //         message    
+    //     })
+    // })
+
+    const test = () => {
+        return new Promise((resolve, reject) => {
+            const data = runPy(filePath)
+            console.log("data runed")
+            resolve(data)
+        })
+    }
+    test().then((m) => {
+        console.log("mm")
+        console.log(m)
         return res.status(200).json({
-            message    
+            m    
         })
     })
 
