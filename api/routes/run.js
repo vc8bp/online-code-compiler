@@ -1,6 +1,7 @@
 const generateFile = require("../helpers/generateFiles");
 const runCpp = require("../helpers/runCPP");
 const runPy = require("../helpers/runPy");
+const { exec } = require('child_process');
 
 const router = require("express").Router()
 
@@ -26,20 +27,20 @@ router.post("/cpp", async (req,res) => {
     //     })
     // })
 
-    const test = () => {
-        return new Promise((resolve, reject) => {
-            const data = runPy(filePath)
-            console.log("data runed")
-            resolve(data)
-        })
-    }
-    test().then((m) => {
-        console.log("mm")
-        console.log(m)
-        return res.status(200).json({
-            m    
-        })
-    })
+    // const test = () => {
+    //     return new Promise((resolve, reject) => {
+    //         const data = runPy(filePath)
+    //         console.log("data runed")
+    //         resolve(data)
+    //     })
+    // }
+    // test().then((m) => {
+    //     console.log("mm")
+    //     console.log(m)
+    //     return res.status(200).json({
+    //         m    
+    //     })
+    // })
 
             // console.log(1)
             // console.log(`output from ${output   }`)
@@ -56,6 +57,50 @@ router.post("/cpp", async (req,res) => {
     
 
     
+})
+
+router.post("/run", async (req,res) => {
+    const {code } = req.body
+    
+
+    const { exec } = require('child_process');
+
+    const runCppInDocker = async (code) => {
+        // Create a temporary directory to store the C++ code
+        const tempDir = `/tmp/cpp-${Date.now()}`;
+        try {
+          await exec(`mkdir ${tempDir}`);
+        } catch (error) {
+          throw error;
+        }
+      
+        // Write the C++ code to a file in the temporary directory
+        const codeFile = `${tempDir}/main.cpp`;
+        try {
+          await exec(`echo "${code}" > ${codeFile}`);
+        } catch (error) {
+          throw error;
+        }
+      
+        // Run the C++ code in a Docker container
+        try {
+          const { stdout, stderr } = await exec(`docker run -v ${tempDir}:/app -w /app g++ main.cpp -o main && docker run -v ${tempDir}:/app -w /app ./main`);
+          if (stderr) {
+            throw stderr;
+          }
+          return stdout;
+        } catch (error) {
+          throw error;
+        }
+      };
+
+    
+    try {
+        const result = await runCppInDocker(req.body.code);
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to run C++ code', error });
+    }
 })
 
 module.exports = router;
