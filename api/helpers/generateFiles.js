@@ -9,9 +9,7 @@ if(!fs.existsSync(dirName)) {
 
 const generateFile = async (ext, code) => {
     const fileName = `${uuid()}.${ext}` 
-    console.log(`file name: ${fileName}`)
     const filePath = path.join(dirName,fileName);
-    console.log(`file path: ${filePath}`)
     await fs.appendFileSync(filePath, code)
     return filePath
 }
