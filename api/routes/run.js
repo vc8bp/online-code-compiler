@@ -1,6 +1,7 @@
 const generateFile = require("../helpers/generateFiles");
 const runCpp = require("../helpers/runCPP");
 const runPy = require("../helpers/runPy");
+const runJs = require("../helpers/runJs");
 const { exec } = require('child_process');
 const fs = require("fs");
 const path = require("path");
@@ -65,25 +66,19 @@ router.post("/", async (req,res) => {
     const {code, len } = req.body
     const filePath = await generateFile(len, code);
     let ress;
+
     try {
-      if(len === "py"){
-        ress = await runPy(filePath)
-      } else if(len === "cpp"){
-        ress = await runCpp(filePath)
-      }
+      if(len === "py") ress = await runPy(filePath)
+      else if(len === "cpp") ress = await runCpp(filePath)
+      else if(len === "js") ress = await runJs(filePath)
     } catch (e) {
-      console.log(e)
-      if(e.message.stderr){
-        ress = {...e, message: e.message.stderr.replace(/File ".*?api\\codes\\(.*?)",/g, '')} //This is used because i wanted to remove the pathname 
-      } else {
-        ress = e
-      }
+      ress = e
     }
 
     try {
       res.status(200).json(ress)
     } catch (error) {
-      res.status(500).json({ message: 'Failed to run C++ code', error });
+      res.status(500).json({ message: `Failed to run ${len} code`, error });
     }
 
     fs.unlinkSync(filePath)

@@ -7,10 +7,10 @@ const runPy = (dir) => {
 
     return new Promise((resolve, reject) => {
         exec(`cd ${codeDir} && python ${outFileName}.py`, (error, stdout, stderr) => {
-            if (error) {
+            if (stderr) {
+                reject({ success: false, message: stderr.replace(/File ".*?api\\codes\\(.*?)",/g, '') }) //This is used because i wanted to remove the pathname 
+            } else if (error) {
                 reject({ success: false, message: { error, stderr } })
-            } else if (stderr) {
-                reject({ success: false, message: stderr })
             } else {
                 resolve({ success: true, message: stdout })
             }
