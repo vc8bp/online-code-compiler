@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  python:
+    build:
+      context: .
+      dockerfile: python-runner
+    volumes:
+      - ./codes:/code
+    working_dir: /code
+
+  cpp:
+    build:
+      context: .
+      dockerfile: cpp-runner
+    volumes:
+      - ./codes:/code
+    working_dir: /code
+
+  javascript:
+    build:
+      context: .
+      dockerfile: js-runner
+    volumes:
+      - ./codes:/code
+    working_dir: /code
+    
+  java:
+    build:
+      context: .
+      dockerfile: java-runner
+    volumes:
+      - ./codes:/code
+    working_dir: /code

@@ -1,14 +1,16 @@
 const  {exec} = require("child_process")
 const path = require("path")
-const codeDir = path.join(__dirname, "../", "codes")
+const codeDir = path.join(__dirname, "../", "codes") // E:\webProjects\react\onlineCodeCompiler\api\codes
+const imageName = "dockerfiles-python"
+
 
 const runPy = (dir) => {
-    const outFileName = path.basename(dir).split(".")[0]
-
+    console.log(dir) 
+    const outFileName = path.basename(dir) 
     return new Promise((resolve, reject) => {
-        exec(`cd ${codeDir} && python ${outFileName}.py`, (error, stdout, stderr) => {
+        exec(`docker run --rm -v ${codeDir}:/code ${imageName} python /code/${outFileName}`, (error, stdout, stderr) => {
             if (stderr) {
-                reject({ success: false, message: stderr.replace(/File ".*?api\\codes\\(.*?)",/g, '') }) //This is used because i wanted to remove the pathname 
+                reject({ success: false, message: stderr}) 
             } else if (error) {
                 reject({ success: false, message: { error, stderr } })
             } else {
