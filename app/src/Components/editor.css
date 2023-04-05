@@ -57,15 +57,17 @@
     border-radius: 5px;
   }
 
+  .message {
+    padding: 1rem;
+    overflow-x: auto;
+  }
   
   .response .success {
-    padding: 1rem;
     background-color: #dff0d8;
     color: #3c763d;
   }
   
   .response .failed {
-    padding: 1rem;
     background-color: #f2dede;
     color: #a94442;
   }

@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import AceEditor from "react-ace";
 import axios from "axios";
 import "./editor.css"
+import "ace-builds/src-noconflict/mode-python"
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/theme-monokai";
@@ -59,7 +60,7 @@ const Editor = () => {
         onChange={handleChange}
         setOptions={{
           tabSize: 2,
-          useWorker: true,
+          useWorker: false,
         }}
       />
       <br />
@@ -77,15 +78,13 @@ const Editor = () => {
           {response.success ? (
             <div >
               <h1>Success</h1>
-              <div className="success">{response.message}</div>
+              <pre className="success message">{response.message}</pre>
             </div>
           ) : (
             <div >
               <h1>Failed</h1>
-              <div className="failed">
-                {response.message.split("\r\n").map(e => {
-                  return <p>{e}</p>
-                })}
+              <div className="failed message">
+                <pre>{response.message}</pre>
               </div>
             </div>
           )}
