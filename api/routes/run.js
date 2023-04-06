@@ -1,87 +1,53 @@
 const generateFile = require("../helpers/generateFiles");
-const runCpp = require("../helpers/runCPP");
-const runPy = require("../helpers/runPy");
-const runJs = require("../helpers/runJs");
-const { exec } = require('child_process');
 const fs = require("fs");
 const path = require("path");
+const runCodeWithTimeout = require("../helpers/RunCode");
 
 const router = require("express").Router()
 
-router.post("/cpp", async (req,res) => {
-    const { len = "cpp", code} = req.body;
-    if(code === undefined) return res.status(400).json({success: false, message: "Code Can not be Empty"})
-    console.log(-1)
-    const filePath = await generateFile(len, code);
-    console.log(0)
-    let output = "hh";
 
 
-    // const p = new Promise((resolve,reject) => {
-    //     const data = runPy(filePath)
-    //     console.log("runPy done")
-    //     resolve(data)
-    // })
-    // p.then((message) => {
-    //     console.log("message")
-    //     console.log(message)
-    //     return res.status(200).json({
-    //         message    
-    //     })
-    // })
+router.post("/", async (req, res) => {
+  const { code, len } = req.body
+  const filePath = await generateFile(len, code);
+  const filename = path.basename(filePath).split(".")[0]
+  let ress;
 
-    // const test = () => {
-    //     return new Promise((resolve, reject) => {
-    //         const data = runPy(filePath)
-    //         console.log("data runed")
-    //         resolve(data)
-    //     })
-    // }
-    // test().then((m) => {
-    //     console.log("mm")
-    //     console.log(m)
-    //     return res.status(200).json({
-    //         m    
-    //     })
-    // })
+  try {
+    const { dockerImage, command } = getDockerImageAndCommand(filename, len)
+    ress = await runCodeWithTimeout({ dockerImage, command, filename })
+  } catch (e) {
+    console.log(e)
+    ress = e
+  }
 
-            // console.log(1)
-            // console.log(`output from ${output   }`)
-            // console.log(2)
-            
-            // console.log(3)
-            // console.log(`data from ${data   }`)
-            // console.log(`output from ${output   }`)
-            // console.log(4)
-        
-            // res.status(200).json({
-            //     data    
-            // })
-    
+  try {
+    res.status(200).json(ress)
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: `Failed to run ${len} code`, error });
+  }
 
-    
+  fs.unlinkSync(filePath)
 })
 
-router.post("/", async (req,res) => {
-    const {code, len } = req.body
-    const filePath = await generateFile(len, code);
-    let ress;
 
-    try {
-      if(len === "py") ress = await runPy(filePath)
-      else if(len === "cpp") ress = await runCpp(filePath)
-      else if(len === "js") ress = await runJs(filePath)
-    } catch (e) {
-      ress = e
-    }
+function getDockerImageAndCommand(filename, len) {
+  let dockerImage, command;
+  if (len === "py") {
+    dockerImage = "dockerfiles-python";
+    command = `python /code/${filename}.py`;
+  } else if (len === "cpp") {
+    dockerImage = "dockerfiles-cpp";
+    command = `sh -c "g++ /code/${filename}.cpp -o /code/${filename}.exe && /code/${filename}.exe"`;
+  } else if (len === "js") {
+    dockerImage = "dockerfiles-javascript";
+    command = `node /code/${filename}.js`;
+  } else {
+    throw new Error("Invalid language");
+  }
+  return { dockerImage, command };
+}
 
-    try {
-      res.status(200).json(ress)
-    } catch (error) {
-      res.status(500).json({ message: `Failed to run ${len} code`, error });
-    }
-
-    fs.unlinkSync(filePath)
-})
 
 module.exports = router;
