@@ -27,7 +27,7 @@ const Editor = () => {
 
   const handleSubmit = async () => {
     try {
-      const { data } = await axios.post("http://localhost:4000/run", {
+      const { data } = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/run`, {
         code,
         len: lenguage,
       });
